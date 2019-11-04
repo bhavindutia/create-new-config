@@ -2,7 +2,6 @@
 #Importing the libraries
 import requests
 import json
-from akamai.edgegrid import EdgeGridAuth
 from urllib.parse import urljoin
 from openpyxl import load_workbook
 import re
@@ -13,7 +12,8 @@ from datetime import datetime
 import calendar
 import yaml
 import time
-from papiwrapper import papiwrapper
+from papiwrapper import searchProperty, getAVersionInfo, cloneProperty
+
 import configparser
 import os
 
@@ -38,28 +38,8 @@ if __name__ == '__main__':
     newpropertyname = yamlhandle['OnboardConfig']['NewConfigName'][0]
     print("New Config Name is ",newpropertyname)
 
-    config = configparser.ConfigParser()
-    config.read(os.path.join(os.path.expanduser("~"),'.edgerc'))
-
-    try:
-    	client_token = config['papi']['client_token']
-    	client_secret = config['papi']['client_secret']
-    	access_token = config['papi']['access_token']
-    	access_hostname = config['papi']['host']
-    	
-    	session = requests.Session()
-    	session.auth = EdgeGridAuth(
-    		client_token = client_token,
-    		client_secret = client_secret,
-    		access_token = access_token
-            	)
-		
-    except (NameError, AttributeError, KeyError):
-    	print ('edgerc file is missing or has invalid entries\n')
-    	exit()
-
-    papiobject = papiwrapper(access_hostname)
-    searchversionobject = papiobject.searchProperty(session,configtoclonefrom)
+    #papiobject = papiwrapper(access_hostname)
+    searchversionobject = searchProperty(configtoclonefrom)
     print (searchversionobject)
 
     propertyid = contractid = groupid = propertyversion = propertyetag = propertyid = ''
@@ -85,7 +65,8 @@ if __name__ == '__main__':
                     break
 
             # Getting a version info. Extracting etag and productID from it
-            propertyversionobject = papiobject.getAVersionInfo(session,contractid, groupid, propertyid,propertyversion)
+            #propertyversionobject = papiobject.getAVersionInfo(session,contractid, groupid, propertyid,propertyversion)
+            propertyversionobject = getAVersionInfo(contractid, groupid, propertyid,propertyversion)
             if propertyversionobject.status_code == 200:
                 propertyetag = propertyversionobject.json()['versions']['items'][0]['etag']
                 print ("Etag value is ",propertyetag)
@@ -107,7 +88,8 @@ if __name__ == '__main__':
                 print ("JSON Object is ",clonedata)
 
 
-                cloneobject = papiobject.cloneProperty(session, contractid, groupid,clonedata)
+                #cloneobject = papiobject.cloneProperty(session, contractid, groupid,clonedata)
+                cloneobject = cloneProperty(contractid, groupid, clonedata)
                 if cloneobject.status_code == 201:
                     outputcatch = re.search('(.*)\/properties\/(.*)\?(.*)',str(cloneobject.json()))  ### Property ID stored in the below variable.
                     propertyid = outputcatch.group(2)
@@ -117,7 +99,7 @@ if __name__ == '__main__':
 
                 else:
                     print("Sorry, something went wrong with the configuration creation! Exiting the program now!\n \n")
-                    print(cloneobject.json())
+                    print ("Error while cloning: ",cloneobject.json()['title'])
 
             else:
                 print("Couldn't get a property version detail")

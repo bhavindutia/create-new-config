@@ -123,7 +123,7 @@ if __name__ == '__main__':
                 print("Couldn't get a property version detail")
                 exit()
 
-                      
+
         else:
             print("No results found. Please check the property you want to clone from")
             exit()
@@ -131,51 +131,3 @@ if __name__ == '__main__':
     else:
     	print ('Something went wrong with the search\n')
     	exit()
-
-'''
-#Search is successful and we want to download version on prod
-    if activeonstaging:
-        print("\nStep 2) Found your property! Downloading it... \n \n \n")
-        print("Contractid, GroupID, PropertyID, PropertyVersion are ", contractid, groupid, propertyid, propertyversion)
-        getpropertyinfo = papiobject.getPropertyRules(session,contractid, groupid, propertyid, propertyversion)
-
-        if getpropertyinfo.status_code == 200:
-            if not os.path.exists('downloadedproperties'):
-                os.makedirs('downloadedproperties')
-            try:
-                with open(os.path.join('downloadedproperties', configname+'.json'), 'w') as propertywritefilehandler:
-                    propertywritefilehandler.write(json.dumps(getpropertyinfo.json(), indent=4))
-                    print("Downloaded the property you want to clone from at ",'downloadedproperties/'+configname+'.json')
-
-            except FileNotFoundError:
-                print('Unable to write file ' + configname + '.json')
-                exit()
-
-            print("Step 3) Reading the written file")
-
-            try:
-                with open(os.path.join('downloadedproperties', configname + '.json'), 'r') as propertyreadfilehandler:
-                    propertystringcontent = propertyreadfilehandler.read()
-                    print("Read property is  ",propertystringcontent)
-
-            except FileNotFoundError:
-                print('Unable to read file ' + configname + '.json')
-                exit()
-
-
-
-        else:
-            print ("Couldn't download the property")
-            exit()
-
-
-    else:
-        print("No active version found on Production. Flag activeonstaging didn't get set to true")
-        exit()
-'''
-
-
-
-
-
-

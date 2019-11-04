@@ -51,6 +51,17 @@ class papiwrapper(object):
         searchresponse = session.post(searchurl,data=json.dumps(data),headers=headers)
         return searchresponse
 
+    def getAVersionInfo(self,session,contractid, groupid, propertyid,propertyversion):
+        print("Inside getPropertyRules of papiwrapper. Printing contractid, sessionid,groupid,propertyid,propertyversion ",contractid,groupid,propertyid,propertyversion)
+        headers = {"PAPI-Use-Prefixes": "true"}
+        getpropertyrulesurl = 'https://' + self.access_hostname + '/papi/v1/properties/' + propertyid + '/versions/' + str(propertyversion) + '?contractId='+ contractid +'&groupId=' + groupid +'&validateRules=true&validateMode=fast'
+        print("Get property rule url is ",getpropertyrulesurl)
+        getpropertyruleresponse = session.get(getpropertyrulesurl, headers=headers)
+        print("Debugging info")
+        return getpropertyruleresponse
+
+
+
     def getPropertyRules(self,session,contractid, groupid, propertyid, propertyversion):
         print("Inside getPropertyRules of papiwrapper. Printing contractid, sessionid,groupid,propertyid,propertyversion ",contractid,groupid,propertyid,propertyversion)
         headers = {"PAPI-Use-Prefixes": "true"}
@@ -59,3 +70,16 @@ class papiwrapper(object):
         getpropertyruleresponse = session.get(getpropertyrulesurl, headers=headers)
         print("Debugging info")
         return getpropertyruleresponse
+
+    def cloneProperty(self,session,contractid, groupid,clonedata):
+        print("Inside Clone Property Function")
+        #headers = {"PAPI-Use-Prefixes": "true"}
+        headers = {"content-type": "application/json"}
+        cloneurl = 'https://' + self.access_hostname + '/papi/v1/properties?contractId=' + contractid + '&groupId=' + groupid
+        print ("Clone url is ",cloneurl)
+        cloneResponse = session.post(cloneurl, data=clonedata, headers=headers)
+        return cloneResponse
+
+
+
+

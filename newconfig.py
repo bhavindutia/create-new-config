@@ -32,8 +32,11 @@ if __name__ == '__main__':
     groupid=yamlhandle['OnboardConfig']['Account'][1]
     print (contractid,groupid)
 
-    configname = yamlhandle['OnboardConfig']['ConfigName'][0]
-    print (configname)
+    configtoclonefrom = yamlhandle['OnboardConfig']['ConfigToCloneFrom'][0]
+    print ("Config to Clone from ",configtoclonefrom)
+
+    newpropertyname = yamlhandle['OnboardConfig']['NewConfigName'][0]
+    print("New Config Name is ",newpropertyname)
 
     config = configparser.ConfigParser()
     config.read(os.path.join(os.path.expanduser("~"),'.edgerc'))
@@ -56,30 +59,71 @@ if __name__ == '__main__':
     	exit()
 
     papiobject = papiwrapper(access_hostname)
-    searchobject = papiobject.searchProperty(session,configname)
-    print (searchobject)
+    searchversionobject = papiobject.searchProperty(session,configtoclonefrom)
+    print (searchversionobject)
 
-    propertyid = contractid = groupid = ''
-    activeonprod = False
+    propertyid = contractid = groupid = propertyversion = propertyetag = propertyid = ''
+    activeonstaging = False
 
 
     #Search result gives response code of 200 even when no property is to be found
     print("\nStep 1) Searching for your property!... \n \n \n")
-    if searchobject.status_code == 200:
-        propertyversions = searchobject.json()['versions']['items']
+    if searchversionobject.status_code == 200:
+        propertyversions = searchversionobject.json()['versions']['items']
         if len(propertyversions)>0:
             for propertyinfo in propertyversions:
                 #print("Property Version is ",propertyversion['propertyVersion'])
                 if propertyinfo['stagingStatus'] == 'ACTIVE':
+                    print("\nStep 1) Found a staging version... \n \n \n")
                     print("Active Staging version is ",propertyinfo['propertyVersion'])
                     contractid = propertyinfo['contractId']
                     groupid = propertyinfo['groupId']
-                    propertyid = propertyinfo['propertyId']
                     propertyversion = propertyinfo['propertyVersion']
-                    #print("Contractid, GroupID, PropertyID, PropertyVersion are ",contractid,groupid,propertyid,propertyversion)
-                    activeonprod = True
+                    propertyid = propertyinfo['propertyId']
+                    print("Contractid, GroupID, PropertyID, PropertyVersion are ",contractid,groupid,propertyid,propertyversion)
+                    activeonstaging = True
                     break
 
+            # Getting a version info. Extracting etag and productID from it
+            propertyversionobject = papiobject.getAVersionInfo(session,contractid, groupid, propertyid,propertyversion)
+            if propertyversionobject.status_code == 200:
+                propertyetag = propertyversionobject.json()['versions']['items'][0]['etag']
+                print ("Etag value is ",propertyetag)
+                productid = propertyversionobject.json()['versions']['items'][0]['productId']
+                print("Product ID is ", productid)
+
+                clonedata = {
+                    "productId": productid,
+                    "propertyName": newpropertyname,
+                    "cloneFrom": {
+                        "propertyId": propertyid,
+                        "version": propertyversion,
+                        "copyHostnames": "false",
+                        "cloneFromVersionEtag": propertyetag
+                    }
+                }
+
+                clonedata = json.dumps(clonedata)
+                print ("JSON Object is ",clonedata)
+
+
+                cloneobject = papiobject.cloneProperty(session, contractid, groupid,clonedata)
+                if cloneobject.status_code == 201:
+                    outputcatch = re.search('(.*)\/properties\/(.*)\?(.*)',str(cloneobject.json()))  ### Property ID stored in the below variable.
+                    propertyid = outputcatch.group(2)
+                    print("propertyid is ", propertyid)
+
+                    #Update config with Hostnames
+
+                else:
+                    print("Sorry, something went wrong with the configuration creation! Exiting the program now!\n \n")
+                    print(cloneobject.json())
+
+            else:
+                print("Couldn't get a property version detail")
+                exit()
+
+                      
         else:
             print("No results found. Please check the property you want to clone from")
             exit()
@@ -88,8 +132,9 @@ if __name__ == '__main__':
     	print ('Something went wrong with the search\n')
     	exit()
 
+'''
 #Search is successful and we want to download version on prod
-    if activeonprod:
+    if activeonstaging:
         print("\nStep 2) Found your property! Downloading it... \n \n \n")
         print("Contractid, GroupID, PropertyID, PropertyVersion are ", contractid, groupid, propertyid, propertyversion)
         getpropertyinfo = papiobject.getPropertyRules(session,contractid, groupid, propertyid, propertyversion)
@@ -125,9 +170,9 @@ if __name__ == '__main__':
 
 
     else:
-        print("No active version found on Production. Flag activeonprod didn't get set to true")
+        print("No active version found on Production. Flag activeonstaging didn't get set to true")
         exit()
-
+'''
 
 
 

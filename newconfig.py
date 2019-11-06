@@ -12,7 +12,7 @@ from datetime import datetime
 import calendar
 import yaml
 import time
-from papiwrapper import searchProperty, getAVersionInfo, cloneProperty
+from papiwrapper import searchProperty, getAVersionInfo, cloneProperty, addHostNames, getPropertyRuleTree,updatePropertyRuleTree
 
 import configparser
 import os
@@ -37,6 +37,12 @@ if __name__ == '__main__':
 
     newpropertyname = yamlhandle['OnboardConfig']['NewConfigName'][0]
     print("New Config Name is ",newpropertyname)
+
+    hostdigitalproperty = yamlhandle['OnboardConfig']['HostDigitalProperty'][0]
+    print("DP: ",hostdigitalproperty)
+
+    hostorigin = yamlhandle['OnboardConfig']['HostOrigin'][0]
+    print("DP: ", hostorigin)
 
     #papiobject = papiwrapper(access_hostname)
     searchversionobject = searchProperty(configtoclonefrom)
@@ -95,7 +101,58 @@ if __name__ == '__main__':
                     propertyid = outputcatch.group(2)
                     print("propertyid is ", propertyid)
 
+
                     #Update config with Hostnames
+                    hostnamedata = [{
+                        "cnameTo": 'www.bdutia.com-v1.edgesuite.net',
+                        "cnameFrom": hostdigitalproperty,
+                        "cnameType": "EDGE_HOSTNAME"
+                    }]
+
+                    hostnamedata = json.dumps(hostnamedata)
+                    print("JSON Object of hostnamedata is ", hostnamedata)
+
+                    result = addHostNames(contractid, groupid, propertyid,hostdigitalproperty,hostnamedata)
+                    if result.status_code == 200:
+                        print("Config updated successfully with hostnames")
+                        #Download property rule JSON object
+                        propertyruletreeobject = getPropertyRuleTree(contractid, groupid, propertyid)
+                        if propertyruletreeobject.status_code == 200:
+                            print("Newly created property with updated hostnames found")
+                            propertyruletreeobject = propertyruletreeobject.json()
+                            print ("Downloaded property rule tree json object is ", propertyruletreeobject)
+
+                            originvariablevalue = propertyruletreeobject['rules']['variables'][0]['value']
+                            if originvariablevalue:
+                                print ("Origin variable value is ",propertyruletreeobject['rules']['variables'][0]['value'])
+                                #Update the variable
+                                propertyruletreeobject['rules']['variables'][0]['value'] = hostorigin
+                                print("Updated Downloaded property rule tree json object is ", propertyruletreeobject)
+
+                                #Pushing the json object with updated origin
+
+                                updatepropertyruletreeobject = updatePropertyRuleTree(contractid,groupid,propertyid,json.dumps(propertyruletreeobject))
+                                if updatepropertyruletreeobject.status_code == 200:
+                                    print("Property updated with specified origin")
+                                else:
+                                    print("Reason of failure. Details:",updatepropertyruletreeobject.json()['detail'])
+                                    print("Something went wrong in updating property with specified origin")
+
+
+                            else:
+                                print ("Origin variable not found")
+
+
+                        else:
+                            print ("Couldn't find newly created property with updated hostnames")
+                            exit()
+
+
+
+                    else:
+                        print("Something went wrong in updating config with hostnames")
+                        exit()
+
 
                 else:
                     print("Sorry, something went wrong with the configuration creation! Exiting the program now!\n \n")

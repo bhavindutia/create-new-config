@@ -56,14 +56,13 @@ def getAVersionInfo(contractid, groupid, propertyid, propertyversion):
     return getpropertyruleresponse
 
 
-def getPropertyRules(contractid, groupid, propertyid, propertyversion):
+def getPropertyRuleTree(contractid, groupid, propertyid):
     print("Inside getPropertyRules of papiwrapper. Printing contractid, sessionid,groupid,propertyid,propertyversion ",
-          contractid, groupid, propertyid, propertyversion)
-    headers = {"PAPI-Use-Prefixes": "true"}
-    getpropertyrulesurl = 'https://' + access_hostname + '/papi/v1/properties/' + propertyid + '/versions/' + str(
-        propertyversion) + '/rules?contractId=' + contractid + '&groupId=' + groupid + '&validateRules=true&validateMode=fast'
+          contractid, groupid, propertyid)
+    #headers = {"Content-Type": "true"}
+    getpropertyrulesurl = 'https://' + access_hostname + '/papi/v1/properties/' + propertyid + '/versions/1/rules?contractId=' + contractid + '&groupId=' + groupid + '&validateRules=true&validateMode=fast'
     print("Get property rule url is ", getpropertyrulesurl)
-    getpropertyruleresponse = session.get(getpropertyrulesurl, headers=headers)
+    getpropertyruleresponse = session.get(getpropertyrulesurl)
     print("Debugging info")
     return getpropertyruleresponse
 
@@ -76,3 +75,19 @@ def cloneProperty(contractid, groupid, clonedata):
     print("Clone url is ", cloneurl)
     cloneResponse = session.post(cloneurl, data=clonedata, headers=headers)
     return cloneResponse
+
+
+def addHostNames(contractid,groupid,propertyid,hostdigitalproperty,hostnamedata):
+    print("Inside Add Hostname function")
+    headers = {"content-type": "application/json"}
+    baseurl = 'https://' + access_hostname + '/papi/v1/properties/' + propertyid + '/versions/1/hostnames/?contractId=' + contractid + '&groupId=' + groupid + '&validateHostnames=true'
+    result = session.put(baseurl,data=hostnamedata, headers=headers)
+    return result
+
+def updatePropertyRuleTree(contractid, groupid,propertyid,propertyruletreedata):
+    print("Inside update property rule")
+    headers = {"content-type": "application/json"}
+    baseurl = 'https://' + access_hostname + '/papi/v1/properties/'+propertyid+'/versions/1/rules?contractId=' +contractid +'&groupId='+groupid+'&validateRules=true'
+    print ("Baseurl for updatepropertyrule is ",baseurl)
+    result = session.put(baseurl,data=propertyruletreedata,headers=headers)
+    return result

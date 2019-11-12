@@ -1,5 +1,6 @@
 input_sample.yaml
- __pycache__
+ __pycache__/
 downloadedproperties
 .DS_Store
 .idea/
+searchpropertyname

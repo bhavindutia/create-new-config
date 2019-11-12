@@ -1,1 +1,5 @@
-bd_template_cli_clone.v1.rule-tree.json	input_sample.yaml __pycache__ downloadedproperties
+input_sample.yaml
+ __pycache__
+downloadedproperties
+.DS_Store
+.idea/

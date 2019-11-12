@@ -24,16 +24,6 @@ except (NameError, AttributeError, KeyError):
     print('edgerc file is missing or has invalid entries\n')
     exit()
 
-def getGroups(self, session):
-    groupUrl = 'https://' + self.access_hostname + '/papi/v1/groups'
-    groupResponse = session.get(groupUrl)
-    if groupResponse.status_code == 200:
-        self.final_response = "SUCCESS"
-    else:
-        self.final_response = "FAILURE"
-    return groupResponse
-
-
 # Search for the property to clone from
 def searchProperty(configname):
     print("Inside search Property ", configname)
@@ -56,6 +46,22 @@ def getAVersionInfo(contractid, groupid, propertyid, propertyversion):
     return getpropertyruleresponse
 
 
+def cloneProperty(contractid, groupid, clonedata):
+    print("Inside Clone Property Function")
+    # headers = {"PAPI-Use-Prefixes": "true"}
+    headers = {"content-type": "application/json"}
+    cloneurl = 'https://' + access_hostname + '/papi/v1/properties?contractId=' + contractid + '&groupId=' + groupid 
+    print("Clone url is ", cloneurl)
+    cloneResponse = session.post(cloneurl, data=clonedata, headers=headers)
+    return cloneResponse
+
+def addHostNames(contractid,groupid,propertyid,hostdigitalproperty,hostnamedata):
+    print("Inside Add Hostname function")
+    headers = {"content-type": "application/json"}
+    baseurl = 'https://' + access_hostname + '/papi/v1/properties/' + propertyid + '/versions/1/hostnames/?contractId=' + contractid + '&groupId=' + groupid + '&validateHostnames=true'
+    result = session.put(baseurl,data=hostnamedata, headers=headers)
+    return result
+
 def getPropertyRuleTree(contractid, groupid, propertyid):
     print("Inside getPropertyRules of papiwrapper. Printing contractid, sessionid,groupid,propertyid,propertyversion ",
           contractid, groupid, propertyid)
@@ -67,23 +73,6 @@ def getPropertyRuleTree(contractid, groupid, propertyid):
     return getpropertyruleresponse
 
 
-def cloneProperty(contractid, groupid, clonedata):
-    print("Inside Clone Property Function")
-    # headers = {"PAPI-Use-Prefixes": "true"}
-    headers = {"content-type": "application/json"}
-    cloneurl = 'https://' + access_hostname + '/papi/v1/properties?contractId=' + contractid + '&groupId=' + groupid
-    print("Clone url is ", cloneurl)
-    cloneResponse = session.post(cloneurl, data=clonedata, headers=headers)
-    return cloneResponse
-
-
-def addHostNames(contractid,groupid,propertyid,hostdigitalproperty,hostnamedata):
-    print("Inside Add Hostname function")
-    headers = {"content-type": "application/json"}
-    baseurl = 'https://' + access_hostname + '/papi/v1/properties/' + propertyid + '/versions/1/hostnames/?contractId=' + contractid + '&groupId=' + groupid + '&validateHostnames=true'
-    result = session.put(baseurl,data=hostnamedata, headers=headers)
-    return result
-
 def updatePropertyRuleTree(contractid, groupid,propertyid,propertyruletreedata):
     print("Inside update property rule")
     headers = {"content-type": "application/json"}
@@ -91,3 +80,4 @@ def updatePropertyRuleTree(contractid, groupid,propertyid,propertyruletreedata):
     print ("Baseurl for updatepropertyrule is ",baseurl)
     result = session.put(baseurl,data=propertyruletreedata,headers=headers)
     return result
+    

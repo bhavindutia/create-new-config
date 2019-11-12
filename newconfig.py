@@ -1,21 +1,10 @@
 #!/usr/bin/env python
 #Importing the libraries
-import requests
 import json
-from urllib.parse import urljoin
-from openpyxl import load_workbook
 import re
-import openpyxl, pprint
-import sys
 import argparse
-from datetime import datetime
-import calendar
 import yaml
-import time
 from papiwrapper import searchProperty, getAVersionInfo, cloneProperty, addHostNames, getPropertyRuleTree,updatePropertyRuleTree
-
-import configparser
-import os
 
 if __name__ == '__main__':
     print("\nLoading up!!! We are now reading your input, please give us a moment... \n \n \n")
@@ -26,12 +15,6 @@ if __name__ == '__main__':
     inputfilename=args.config
     # Extract the account/contract details from the YAML file.
     yamlhandle=yaml.load(open(inputfilename))
-    #Extracting the contract ID.
-    contractid = yamlhandle['OnboardConfig']['Account'][0]
-    #Extracting the group ID.
-    groupid=yamlhandle['OnboardConfig']['Account'][1]
-    print (contractid,groupid)
-
     configtoclonefrom = yamlhandle['OnboardConfig']['ConfigToCloneFrom'][0]
     print ("Config to Clone from ",configtoclonefrom)
 
@@ -42,7 +25,10 @@ if __name__ == '__main__':
     print("DP: ",hostdigitalproperty)
 
     hostorigin = yamlhandle['OnboardConfig']['HostOrigin'][0]
-    print("DP: ", hostorigin)
+    print("Origin: ", hostorigin)
+
+    edgehostname = yamlhandle['OnboardConfig']['EdgeHostName'][0]
+    print("Edge Host Name is ",edgehostname)
 
     #papiobject = papiwrapper(access_hostname)
     searchversionobject = searchProperty(configtoclonefrom)
@@ -69,6 +55,7 @@ if __name__ == '__main__':
                     print("Contractid, GroupID, PropertyID, PropertyVersion are ",contractid,groupid,propertyid,propertyversion)
                     activeonstaging = True
                     break
+
 
             # Getting a version info. Extracting etag and productID from it
             #propertyversionobject = papiobject.getAVersionInfo(session,contractid, groupid, propertyid,propertyversion)
@@ -104,18 +91,21 @@ if __name__ == '__main__':
 
                     #Update config with Hostnames
                     hostnamedata = [{
-                        "cnameTo": 'www.bdutia.com-v1.edgesuite.net',
+                        "cnameTo": edgehostname,
                         "cnameFrom": hostdigitalproperty,
-                        "cnameType": "EDGE_HOSTNAME"
+                        "cnameType": "EDGE_HOSTNAME",
+                        "secure":"true"
                     }]
 
                     hostnamedata = json.dumps(hostnamedata)
                     print("JSON Object of hostnamedata is ", hostnamedata)
 
+
                     result = addHostNames(contractid, groupid, propertyid,hostdigitalproperty,hostnamedata)
                     if result.status_code == 200:
                         print("Config updated successfully with hostnames")
                         #Download property rule JSON object
+
                         propertyruletreeobject = getPropertyRuleTree(contractid, groupid, propertyid)
                         if propertyruletreeobject.status_code == 200:
                             print("Newly created property with updated hostnames found")
@@ -147,10 +137,11 @@ if __name__ == '__main__':
                             print ("Couldn't find newly created property with updated hostnames")
                             exit()
 
-
+                    
 
                     else:
                         print("Something went wrong in updating config with hostnames")
+                        print("Error while cloning: ", result.json()['title'])
                         exit()
 
 
@@ -164,7 +155,7 @@ if __name__ == '__main__':
 
 
         else:
-            print("No results found. Please check the property you want to clone from")
+            print("No active version of the property results found")
             exit()
 
     else:

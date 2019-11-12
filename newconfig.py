@@ -110,8 +110,8 @@ if __name__ == '__main__':
                         if propertyruletreeobject.status_code == 200:
                             print("Newly created property with updated hostnames found")
                             propertyruletreeobject = propertyruletreeobject.json()
+                            
                             print ("Downloaded property rule tree json object is ", propertyruletreeobject)
-
                             originvariablevalue = propertyruletreeobject['rules']['variables'][0]['value']
                             if originvariablevalue:
                                 print ("Origin variable value is ",propertyruletreeobject['rules']['variables'][0]['value'])

@@ -50,7 +50,7 @@ def cloneProperty(contractid, groupid, clonedata):
     print("Inside Clone Property Function")
     # headers = {"PAPI-Use-Prefixes": "true"}
     headers = {"content-type": "application/json"}
-    cloneurl = 'https://' + access_hostname + '/papi/v1/properties?contractId=' + contractid + '&groupId=' + groupid 
+    cloneurl = 'https://' + access_hostname + '/papi/v1/properties?contractId=' + contractid + '&groupId=' + groupid
     print("Clone url is ", cloneurl)
     cloneResponse = session.post(cloneurl, data=clonedata, headers=headers)
     return cloneResponse

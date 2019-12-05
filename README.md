@@ -13,7 +13,7 @@ pip3 install pyyaml
 ## Step 2: Configure your YAML file
 
 OnboardConfig\:
- \ConfigToCloneFrom:
+ ConfigToCloneFrom\:
   - foo.example.coom
  NewConfigName:
   - bar.example.coom

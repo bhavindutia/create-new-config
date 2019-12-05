@@ -14,14 +14,14 @@ pip3 install pyyaml
 
 OnboardConfig:
  ConfigToCloneFrom:
-  - foo.example.coom
+  \- foo.example.coom
  NewConfigName:
-  - bar.example.coom
+  \- bar.example.coom
  DigitalProperty:
-  - bar.example.com
+  \- bar.example.com
  HostOrigin:
-  - origin.example.com
+  \- origin.example.com
  EdgeHostName:
-  - bar.example.com.edgekey.net
+  \- bar.example.com.edgekey.net
  CommonName:
-  - '*.example.com
+  \- '*.example.com

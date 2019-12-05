@@ -26,7 +26,7 @@ OnboardConfig:
   - '*.example.com'
 ```
 
-### Step 3: Configure your Akamai Credentials [here] (https://developer.akamai.com/api/getting-started). Then update credential.yaml file as below
+### Step 3: Configure your Akamai Credentials [here](https://developer.akamai.com/api/getting-started). Then update credential.yaml file as below
 
 Enter the appropriate API secrets within credentials.yml
 ```

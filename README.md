@@ -1,6 +1,6 @@
 # Create New Configs
 
-Create new config based on existing config. Then update origin and add hostnames and push it out to staging
+Python script to clone an existing configuration on Akamai and lets you specify input parameters like config name, digital property, Edgehostname from a yaml file.
 
 
 ## Installation Guide
